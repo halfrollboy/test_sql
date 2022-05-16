@@ -47,6 +47,10 @@ class Office:
     def __init__(self):
         self.db = get_session()()
 
+    def __del__(self):
+        """Закрываем подключение при удалении объекта"""
+        self.db.close()
+
     def create_table(self):
         cur = self.db.cursor()
         try:
@@ -60,11 +64,12 @@ class Office:
                 );
                 """
             )
+            self.db.commit()
         except Exception as e:
             print("create ", e)
             self.db.rollback()
         finally:
-            self.db.commit()
+            cur.close()
         print("Таблица создана")
 
     def none_replace(self, row):
@@ -84,48 +89,24 @@ class Office:
         return data
 
     def fill_table(self):
-        # string = string[:-1] + ";"
         cur = self.db.cursor()
         insert_values = "INSERT INTO office (id, parentid, name, type) VALUES %s"
         try:
             extras.execute_values(cur, insert_values, [*self.get_data()])
             self.db.commit()
-            print("commit complit")
         except (Exception, psycopg2.DatabaseError) as error:
             print("Error: %s" % error)
             self.db.rollback()
+        finally:
             cur.close()
-            return 1
+        print("Database fill")
 
-        # except Exception as e:
-        #     print(e)
-        #     self.cur.rollback
-        # finally:
-        #     print("com")
-        #     self.db.commit()
-
-        # print(string)
-        # try:
-        #     self.cur.execute(
-        #         """
-        #         INSERT INTO office (id, parentid, name, type) VALUES {}
-        #         """.format(
-        #             string
-        #         )
-        #     )
-        # except Exception as e:
-        #     print("Fill table ", e)
-        print("data okey")
+    def select_some(self):
+        """Первая выборка данных"""
+        pass
 
 
 if __name__ == "__main__":
     db = Office()
     db.create_table()
     db.fill_table()
-
-
-#  if somecondition:
-#         anotherConn.commit()
-#     else:
-#         anotherConn.rollback
-# cursor.close()
