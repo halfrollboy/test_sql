@@ -1,28 +1,23 @@
-Переменные для базы данных находятся в .env файле
-WITH RECURSIVE r AS (
-   SELECT id, parentid, name, type, 1 AS level
-   FROM office
-   WHERE id = 3
+# Тестовое задание для Тензора
 
-   UNION ALL
+## Описание
 
-   SELECT office.id, office.parentid, office.name, office.type, r.level + 1 AS level
-   FROM office
-      JOIN r
-          ON office.id = r.parentid
-)
 
-WITH RECURSIVE main AS (
-   SELECT id, parentid, name, 1 AS level
-   FROM office
-   WHERE id = (select r.id from r where r.type = 1)
+## Варианты запуска
+### C базой данных локально
 
-   UNION ALL
+### С базой данных в докере
+Если уже стоит локально база и не хочется в неё грузить лишнее, то гораздо удобнее использовать её из докера
+Я сам так и использовал. 
+В репозитории есть docker-compose в котором:
+--PostgresSQL:10 
+--pgAdmin
 
-   SELECT office.id, office.parentid, office.name, main.level + 1 AS level
-   FROM office
-      JOIN main
-          ON office.parentid = main.id
-)
+Если хотите поменять порт или название базы данных, то можно поменять (.env) файл который используется для конфигурации.
+Что требуется сделать:
 
-SELECT * FROM main where ;
+0. Перейдите в папку с проектом (у вас должен быть установлен docker и docker-compose)
+1. `python -m venv env`
+2. `pip install -r requirements.txt`
+3. `docker-compose up --build`
+4. `python db.py -c` (флаг нужен, чтобы создать базу и заполнить её данными, дальше можно без него)

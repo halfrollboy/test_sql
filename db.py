@@ -1,23 +1,21 @@
-import psycopg2.pool as pool
-import psycopg2.extras as extras
-from psycopg2.extensions import ISOLATION_LEVEL_SERIALIZABLE
-import psycopg2
 import os
 import json
+import argparse
+from psycopg2 import DatabaseError
+from psycopg2 import pool
+from psycopg2 import extras
+from psycopg2.extensions import ISOLATION_LEVEL_SERIALIZABLE
 from dotenv import load_dotenv
 from colorama import init
 from colorama import Fore
 
-init()
 
+init()
 
 # load_dotenv будет искать файл .env, и, если он его найдет,
 # из него будут загружены переменные среды
-
-# Добавлено для удобства работы с базой данных
+# Добавлено исключительно для удобства работы с базой данных
 load_dotenv()
-
-null = "NULL"
 
 
 def get_session():
@@ -57,6 +55,7 @@ class Office:
         self.db.close()
 
     def create_table(self):
+        """Метод создающий таблицу в базе данных"""
         cur = self.db.cursor()
         try:
             cur.execute(
@@ -89,18 +88,18 @@ class Office:
     def fill_table(self):
         """Метод заполняющий таблицу данными"""
         cur = self.db.cursor()
-        insert_values = "INSERT INTO office (id, parentid, name, type) VALUES %s"
+        insert_values = """INSERT INTO office (id, parentid, name, type)
+                            VALUES %s"""
         try:
             extras.execute_values(cur, insert_values, [*self.get_data()])
             self.db.commit()
-        except (Exception, psycopg2.DatabaseError) as error:
-            print(Fore.RED, "Error: %s" % error)
+        except (Exception, DatabaseError) as error:
+            print(Fore.RED, "Error fill: %s" % error)
             self.db.rollback()
         finally:
             cur.close()
         print(Fore.GREEN + "Database fill")
 
-    # Сделать чтение данных
     def select_some(self, id):
         """Первая выборка данных"""
         insert_value = """
@@ -111,7 +110,8 @@ class Office:
 
                 UNION ALL
 
-                SELECT office.id, office.parentid, office.name, office.type, r.level + 1 AS level
+                SELECT office.id, office.parentid, office.name,
+                    office.type, r.level + 1 AS level
                 FROM office
                     JOIN r
                         ON office.id = r.parentid
@@ -123,10 +123,11 @@ class Office:
 
                 UNION ALL
 
-                SELECT office.id, office.parentid, office.name,office.type, main.level + 1 AS level
+                SELECT office.id, office.parentid, office.name,
+                    office.type, main.level + 1 AS level
                 FROM office
                     JOIN main
-                        ON office.parentid = main.id 
+                        ON office.parentid = main.id
                 )
 
                 SELECT * FROM main where main.type=1 or main.type=3;""".format(
@@ -146,14 +147,30 @@ class Office:
             cur.close()
 
 
-if __name__ == "__main__":
-    db = Office()
-    # db.create_table()
-    # db.fill_table()
+def organization():
+    """Сделано для удобства работы с запросом и создания таблицы"""
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-c", "--create", help="use for create table", action="store_true"
+    )
+    args = parser.parse_args()
+    return args.create
+
+
+def get_id():
+    """Ввод id для поиска в таблице"""
     id = input("Введите id: ")
-    if id.isdigit() == False:
-        while id.isdigit() == False:
+    if id.isdigit() is False:
+        while id.isdigit() is False:
             print("Неверный тип попробуйте снова")
             id = input("Введите id: ")
 
+
+if __name__ == "__main__":
+    db = Office()
+    if organization():
+        db.create_table()
+        db.fill_table()
+
+    id = get_id()
     db.select_some(id)
