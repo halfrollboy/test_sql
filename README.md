@@ -14,7 +14,7 @@
 1. `python -m venv env`
 2. `pip install -r requirements.txt`
 3. `docker-compose up --build`
-4. `python db.py -c`
+4. `python app.py -c`
 ### С базой данных в докере
 Если уже стоит локально база и не хочется в неё грузить лишнее, то гораздо удобнее использовать её из докера
 Я сам так и использовал. 
@@ -29,11 +29,11 @@
 1. `python -m venv env`
 2. `pip install -r requirements.txt`
 3. `docker-compose up --build`
-4. `python db.py -c`
+4. `python app.py -c`
 
 ### Варианты запуска
 Программа может быть запущена в двух режимах
-1. `python db.py`
-2. `python db.py -c`
+1. `python app.py`
+2. `python app.py -c`
 
 Второй вариант с аргументом будет использоваться только для создания таблицы и наполнения её данными
