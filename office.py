@@ -44,7 +44,7 @@ class Office:
             cur.close()
         print(Fore.GREEN + "--Table 'office' create")
 
-    def get_data(self):
+    def get_data(self) -> list[tuple]:
         """Открытие и парсинг Json файла"""
         with open("data.json", "r", encoding="utf-8") as read_file:
             contains = json.load(read_file)
@@ -68,8 +68,11 @@ class Office:
             cur.close()
         print(Fore.GREEN + "Database fill")
 
-    def select_some(self, id):
-        """Первая выборка данных"""
+    def select_people(self, id: int):
+        """
+        Метод по id выбирает человек в офисе,
+        которому принадлежит сотрудник с переданным id
+        """
         insert_value = """
                 WITH RECURSIVE r AS (
                 SELECT id, parentid, name, type, 1 AS level

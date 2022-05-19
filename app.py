@@ -2,7 +2,7 @@ import argparse
 from office import Office
 
 
-def organization():
+def organization() -> bool:
     """Функция обработки аргумента"""
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -12,7 +12,7 @@ def organization():
     return args.create
 
 
-def get_id():
+def get_id() -> str:
     """Получение id для поиска в таблице"""
     id = input("Введите id: ")
     if id.isdigit() is False:
@@ -29,4 +29,4 @@ if __name__ == "__main__":
         db.fill_table()
 
     id = get_id()
-    db.select_some(id)
+    db.select_people(id)
